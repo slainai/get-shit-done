@@ -1163,9 +1163,12 @@ describe('E2E: Copilot full install verification', () => {
     const gsdAgents = files.filter(f => f.startsWith('gsd-') && f.endsWith('.agent.md')).sort();
     const expected = [
       'gsd-advisor-researcher.agent.md',
+      'gsd-architect.agent.md',
       'gsd-assumptions-analyzer.agent.md',
       'gsd-codebase-mapper.agent.md',
       'gsd-debugger.agent.md',
+      'gsd-design-reviewer.agent.md',
+      'gsd-designer.agent.md',
       'gsd-executor.agent.md',
       'gsd-integration-checker.agent.md',
       'gsd-nyquist-auditor.agent.md',

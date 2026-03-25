@@ -435,9 +435,27 @@ VERIFICATION_PATH=$(_gsd_field "$INIT" verification_path)
 UAT_PATH=$(_gsd_field "$INIT" uat_path)
 CONTEXT_PATH=$(_gsd_field "$INIT" context_path)
 REVIEWS_PATH=$(_gsd_field "$INIT" reviews_path)
+HLD_PATH=$(_gsd_field "$INIT" hld_path)
+LLD_PATH=$(_gsd_field "$INIT" lld_path)
+TECH_SPEC_PATH=$(_gsd_field "$INIT" tech_spec_path)
+DESIGN_DOCS_ENABLED=$(_gsd_field "$INIT" design_docs_enabled)
 ```
 
-## 7.5. Verify Nyquist Artifacts
+## 7.5. Check Design Docs
+
+**Skip if:** `DESIGN_DOCS_ENABLED` is false or empty.
+
+If `DESIGN_DOCS_ENABLED` is true:
+- Check if `HLD_PATH`, `LLD_PATH`, `TECH_SPEC_PATH` are set (non-empty)
+- **If ALL three exist:** Design docs will be included in planner context. Display: "Design docs found — planner will use HLD, LLD, and Technical Spec."
+- **If NONE exist:** Ask user:
+  - question: "Design documentation is enabled but Phase {X} has no HLD, LLD, or Technical Spec. Plans will be created without architectural design. Continue or run design-phase first?"
+  - options:
+    - "Continue without design" — Proceed to step 8
+    - "Run design-phase first" — Display: "Run `/gsd:design-phase {X}` then re-run `/gsd:plan-phase {X}`". Exit workflow.
+- **If SOME exist (partial):** Warn which are missing, ask: continue or complete design first.
+
+## 7.6. Verify Nyquist Artifacts
 
 Skip if `nyquist_validation_enabled` is false OR `research_enabled` is false.
 
@@ -488,7 +506,15 @@ Planner prompt:
 - {uat_path} (UAT Gaps - if --gaps)
 - {reviews_path} (Cross-AI Review Feedback - if --reviews)
 - {UI_SPEC_PATH} (UI Design Contract — visual/interaction specs, if exists)
+- {HLD_PATH} (High-Level Design — architecture and component boundaries, if exists)
+- {LLD_PATH} (Low-Level Design — detailed interfaces and contracts, if exists)
+- {TECH_SPEC_PATH} (Technical Specification — file map and dependency order, if exists)
 </files_to_read>
+
+**Design docs available:** If HLD, LLD, and Technical Spec exist, plans MUST align with:
+- Architectural decomposition from HLD (component boundaries)
+- Interfaces and contracts from LLD (exact signatures)
+- File map and dependency order from Technical Spec (wave assignment, files_modified)
 
 ${AGENT_SKILLS_PLANNER}
 

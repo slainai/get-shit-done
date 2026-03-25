@@ -150,7 +150,15 @@ Task(
 
 ## 5. Handle Agent Return
 
-**`## RESEARCH COMPLETE`:** Display summary, offer: Plan phase, Dig deeper, Review full, Done.
+**`## RESEARCH COMPLETE`:** Display summary.
+
+Check `design_docs_enabled` from init:
+```bash
+DESIGN_DOCS_ENABLED=$(node "$HOME/.claude/get-shit-done/bin/gsd-tools.cjs" config-get workflow.design_docs 2>/dev/null || echo "true")
+```
+
+If `design_docs_enabled` is true, offer: **Design phase** (recommended), Plan phase (skip design), Dig deeper, Review full, Done.
+If `design_docs_enabled` is false, offer: Plan phase, Dig deeper, Review full, Done.
 
 **`## CHECKPOINT REACHED`:** Present to user, get response, spawn continuation.
 

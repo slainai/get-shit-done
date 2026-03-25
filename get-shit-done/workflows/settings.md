@@ -29,6 +29,7 @@ Parse current values (default to `true` if not present):
 - `workflow.research` — spawn researcher during plan-phase
 - `workflow.plan_check` — spawn plan checker during plan-phase
 - `workflow.verifier` — spawn verifier during execute-phase
+- `workflow.design_docs` — generate HLD, LLD, Technical Spec between research and planning (default: true if absent)
 - `workflow.nyquist_validation` — validation architecture research during plan-phase (default: true if absent)
 - `workflow.ui_phase` — generate UI-SPEC.md design contracts for frontend phases (default: true if absent)
 - `workflow.ui_safety_gate` — prompt to run /gsd:ui-phase before planning frontend phases (default: true if absent)
@@ -86,6 +87,15 @@ AskUserQuestion([
     options: [
       { label: "No (Recommended)", description: "Manual /clear + paste between stages" },
       { label: "Yes", description: "Chain stages via Task() subagents (same isolation)" }
+    ]
+  },
+  {
+    question: "Enable Design Documentation? (HLD → LLD → Technical Spec between research and planning)",
+    header: "Design Docs",
+    multiSelect: false,
+    options: [
+      { label: "Yes (Recommended)", description: "Generate architecture (HLD), detailed design (LLD), and implementation map (Technical Spec) before planning. Better quality plans for complex systems." },
+      { label: "No", description: "Skip design documentation. Go straight from research to planning. Good for simple features or bug fixes." }
     ]
   },
   {
@@ -170,6 +180,7 @@ Merge new settings into existing config.json:
     "plan_check": true/false,
     "verifier": true/false,
     "auto_advance": true/false,
+    "design_docs": true/false,
     "nyquist_validation": true/false,
     "ui_phase": true/false,
     "ui_safety_gate": true/false,
@@ -230,6 +241,7 @@ Write `~/.gsd/defaults.json` with:
     "plan_check": <current>,
     "verifier": <current>,
     "auto_advance": <current>,
+    "design_docs": <current>,
     "nyquist_validation": <current>,
     "ui_phase": <current>,
     "ui_safety_gate": <current>,

@@ -178,8 +178,14 @@ function cmdInitPlanPhase(cwd, phase, raw) {
     research_enabled: config.research,
     plan_checker_enabled: config.plan_checker,
     nyquist_validation_enabled: config.nyquist_validation,
+    design_docs_enabled: config.design_docs,
     commit_docs: config.commit_docs,
     text_mode: config.text_mode,
+
+    // Design doc models (resolved when design_docs enabled)
+    architect_model: resolveModelInternal(cwd, 'gsd-architect'),
+    designer_model: resolveModelInternal(cwd, 'gsd-designer'),
+    design_reviewer_model: resolveModelInternal(cwd, 'gsd-design-reviewer'),
 
     // Phase info
     phase_found: !!phaseInfo,
@@ -232,6 +238,123 @@ function cmdInitPlanPhase(cwd, phase, raw) {
       if (reviewsFile) {
         result.reviews_path = toPosixPath(path.join(phaseInfo.directory, reviewsFile));
       }
+      // Design docs
+      const hldFile = files.find(f => f.endsWith('-HLD.md') || f === 'HLD.md');
+      if (hldFile) {
+        result.hld_path = toPosixPath(path.join(phaseInfo.directory, hldFile));
+      }
+      const lldFile = files.find(f => f.endsWith('-LLD.md') || f === 'LLD.md');
+      if (lldFile) {
+        result.lld_path = toPosixPath(path.join(phaseInfo.directory, lldFile));
+      }
+      const techSpecFile = files.find(f => f.endsWith('-TECHNICAL-SPEC.md') || f === 'TECHNICAL-SPEC.md');
+      if (techSpecFile) {
+        result.tech_spec_path = toPosixPath(path.join(phaseInfo.directory, techSpecFile));
+      }
+      result.has_hld = !!result.hld_path;
+      result.has_lld = !!result.lld_path;
+      result.has_tech_spec = !!result.tech_spec_path;
+    } catch { /* intentionally empty */ }
+  }
+
+  output(withProjectRoot(cwd, result), raw);
+}
+
+function cmdInitDesignPhase(cwd, phase, raw) {
+  if (!phase) {
+    error('phase required for init design-phase');
+  }
+
+  const config = loadConfig(cwd);
+  let phaseInfo = findPhaseInternal(cwd, phase);
+
+  const roadmapPhase = getRoadmapPhaseInternal(cwd, phase);
+
+  // Fallback to ROADMAP.md if no phase directory exists yet
+  if (!phaseInfo && roadmapPhase?.found) {
+    const phaseName = roadmapPhase.phase_name;
+    phaseInfo = {
+      found: true,
+      directory: null,
+      phase_number: roadmapPhase.phase_number,
+      phase_name: phaseName,
+      phase_slug: phaseName ? phaseName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') : null,
+      plans: [],
+      summaries: [],
+      incomplete_plans: [],
+      has_research: false,
+      has_context: false,
+      has_verification: false,
+      has_reviews: false,
+    };
+  }
+
+  const reqMatch = roadmapPhase?.section?.match(/^\*\*Requirements\*\*:[^\S\n]*([^\n]*)$/m);
+  const reqExtracted = reqMatch
+    ? reqMatch[1].replace(/[\[\]]/g, '').split(',').map(s => s.trim()).filter(Boolean).join(', ')
+    : null;
+  const phase_req_ids = (reqExtracted && reqExtracted !== 'TBD') ? reqExtracted : null;
+
+  const result = {
+    // Models
+    architect_model: resolveModelInternal(cwd, 'gsd-architect'),
+    designer_model: resolveModelInternal(cwd, 'gsd-designer'),
+    design_reviewer_model: resolveModelInternal(cwd, 'gsd-design-reviewer'),
+
+    // Workflow flags
+    design_docs_enabled: config.design_docs,
+    commit_docs: config.commit_docs,
+
+    // Phase info
+    phase_found: !!phaseInfo,
+    phase_dir: phaseInfo?.directory || null,
+    phase_number: phaseInfo?.phase_number || null,
+    phase_name: phaseInfo?.phase_name || null,
+    phase_slug: phaseInfo?.phase_slug || null,
+    padded_phase: phaseInfo?.phase_number ? normalizePhaseName(phaseInfo.phase_number) : null,
+    phase_req_ids,
+
+    // Existing artifacts
+    has_context: phaseInfo?.has_context || false,
+    has_research: phaseInfo?.has_research || false,
+
+    // Environment
+    planning_exists: fs.existsSync(planningDir(cwd)),
+    roadmap_exists: fs.existsSync(path.join(planningDir(cwd), 'ROADMAP.md')),
+
+    // File paths
+    state_path: toPosixPath(path.relative(cwd, path.join(planningDir(cwd), 'STATE.md'))),
+    roadmap_path: toPosixPath(path.relative(cwd, path.join(planningDir(cwd), 'ROADMAP.md'))),
+    requirements_path: toPosixPath(path.relative(cwd, path.join(planningDir(cwd), 'REQUIREMENTS.md'))),
+  };
+
+  if (phaseInfo?.directory) {
+    const phaseDirFull = path.join(cwd, phaseInfo.directory);
+    try {
+      const files = fs.readdirSync(phaseDirFull);
+      const contextFile = files.find(f => f.endsWith('-CONTEXT.md') || f === 'CONTEXT.md');
+      if (contextFile) {
+        result.context_path = toPosixPath(path.join(phaseInfo.directory, contextFile));
+      }
+      const researchFile = files.find(f => f.endsWith('-RESEARCH.md') || f === 'RESEARCH.md');
+      if (researchFile) {
+        result.research_path = toPosixPath(path.join(phaseInfo.directory, researchFile));
+      }
+      const hldFile = files.find(f => f.endsWith('-HLD.md') || f === 'HLD.md');
+      if (hldFile) {
+        result.hld_path = toPosixPath(path.join(phaseInfo.directory, hldFile));
+      }
+      const lldFile = files.find(f => f.endsWith('-LLD.md') || f === 'LLD.md');
+      if (lldFile) {
+        result.lld_path = toPosixPath(path.join(phaseInfo.directory, lldFile));
+      }
+      const techSpecFile = files.find(f => f.endsWith('-TECHNICAL-SPEC.md') || f === 'TECHNICAL-SPEC.md');
+      if (techSpecFile) {
+        result.tech_spec_path = toPosixPath(path.join(phaseInfo.directory, techSpecFile));
+      }
+      result.has_hld = !!result.hld_path;
+      result.has_lld = !!result.lld_path;
+      result.has_tech_spec = !!result.tech_spec_path;
     } catch { /* intentionally empty */ }
   }
 
@@ -1422,6 +1545,7 @@ function cmdAgentSkills(cwd, agentType, raw) {
 module.exports = {
   cmdInitExecutePhase,
   cmdInitPlanPhase,
+  cmdInitDesignPhase,
   cmdInitNewProject,
   cmdInitNewMilestone,
   cmdInitQuick,

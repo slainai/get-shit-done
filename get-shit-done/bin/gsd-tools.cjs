@@ -123,6 +123,7 @@
  * Compound Commands (workflow-specific initialization):
  *   init execute-phase <phase>         All context for execute-phase workflow
  *   init plan-phase <phase>            All context for plan-phase workflow
+ *   init design-phase <phase>          All context for design-phase workflow
  *   init new-project                   All context for new-project workflow
  *   init new-milestone                 All context for new-milestone workflow
  *   init quick <description>           All context for quick workflow
@@ -717,6 +718,9 @@ async function runCommand(command, args, cwd, raw) {
           break;
         case 'plan-phase':
           init.cmdInitPlanPhase(cwd, args[2], raw);
+          break;
+        case 'design-phase':
+          init.cmdInitDesignPhase(cwd, args[2], raw);
           break;
         case 'new-project':
           init.cmdInitNewProject(cwd, raw);
