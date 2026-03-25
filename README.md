@@ -30,7 +30,7 @@ GSD_CLONE_DIR="${HOME}/tmp/gsd-install"
 # ── INSTALL ──
 rm -rf "$GSD_CLONE_DIR"
 git clone https://github.com/slainai/get-shit-done.git "$GSD_CLONE_DIR"
-cd "$GSD_CLONE_DIR" && node bin/install.js --claude --global
+cd "$GSD_CLONE_DIR" && npm install && npm run build:hooks && node bin/install.js --claude --global
 cd ~
 
 # ── CLEANUP: clone is no longer needed after install ──
@@ -69,7 +69,7 @@ $GSD_CLONE_DIR = "$env:USERPROFILE\tmp\gsd-install"
 if (Test-Path $GSD_CLONE_DIR) { Remove-Item -Recurse -Force $GSD_CLONE_DIR }
 git clone https://github.com/slainai/get-shit-done.git $GSD_CLONE_DIR
 Push-Location $GSD_CLONE_DIR
-node bin/install.js --claude --global
+npm install; npm run build:hooks; node bin/install.js --claude --global
 Pop-Location
 
 # ── CLEANUP ──
@@ -107,6 +107,7 @@ The installer copies everything into `~/.claude/` (or `%USERPROFILE%\.claude\` o
 ~/.claude/
 ├── commands/gsd/           # 36+ slash commands (/gsd:new-project, etc.)
 ├── agents/                 # 21 agent definitions (gsd-planner, gsd-architect, etc.)
+├── hooks/                  # 5 session hooks (update check, context monitor, prompt guard, etc.)
 └── get-shit-done/
     ├── bin/                # CLI tools (gsd-tools.cjs + libraries)
     ├── workflows/          # 39+ workflow orchestrations
@@ -138,7 +139,7 @@ When the team pushes changes to our fork, re-run the install:
 GSD_CLONE_DIR="${HOME}/tmp/gsd-install"
 rm -rf "$GSD_CLONE_DIR"
 git clone https://github.com/slainai/get-shit-done.git "$GSD_CLONE_DIR"
-cd "$GSD_CLONE_DIR" && node bin/install.js --claude --global
+cd "$GSD_CLONE_DIR" && npm install && npm run build:hooks && node bin/install.js --claude --global
 cd ~ && rm -rf "$GSD_CLONE_DIR"
 echo "Updated. Restart Claude Code session to pick up changes."
 ```
@@ -150,7 +151,7 @@ $GSD_CLONE_DIR = "$env:USERPROFILE\tmp\gsd-install"
 if (Test-Path $GSD_CLONE_DIR) { Remove-Item -Recurse -Force $GSD_CLONE_DIR }
 git clone https://github.com/slainai/get-shit-done.git $GSD_CLONE_DIR
 Push-Location $GSD_CLONE_DIR
-node bin/install.js --claude --global
+npm install; npm run build:hooks; node bin/install.js --claude --global
 Pop-Location
 Remove-Item -Recurse -Force $GSD_CLONE_DIR
 Write-Host "Updated. Restart Claude Code session to pick up changes."
@@ -164,6 +165,7 @@ If a project needs its own GSD version instead of global:
 GSD_CLONE_DIR="${HOME}/tmp/gsd-install"
 rm -rf "$GSD_CLONE_DIR"
 git clone https://github.com/slainai/get-shit-done.git "$GSD_CLONE_DIR"
+cd "$GSD_CLONE_DIR" && npm install && npm run build:hooks && cd -
 cd /path/to/your-project
 node "$GSD_CLONE_DIR/bin/install.js" --claude --local
 rm -rf "$GSD_CLONE_DIR"
@@ -518,10 +520,10 @@ After pushing changes:
 GSD updated — [what changed]
 
 Update (Mac/Linux):
-  GSD_CLONE_DIR="${HOME}/tmp/gsd-install" && rm -rf "$GSD_CLONE_DIR" && git clone https://github.com/slainai/get-shit-done.git "$GSD_CLONE_DIR" && cd "$GSD_CLONE_DIR" && node bin/install.js --claude --global && cd ~ && rm -rf "$GSD_CLONE_DIR"
+  GSD_CLONE_DIR="${HOME}/tmp/gsd-install" && rm -rf "$GSD_CLONE_DIR" && git clone https://github.com/slainai/get-shit-done.git "$GSD_CLONE_DIR" && cd "$GSD_CLONE_DIR" && npm install && npm run build:hooks && node bin/install.js --claude --global && cd ~ && rm -rf "$GSD_CLONE_DIR"
 
 Update (Windows PowerShell):
-  $d="$env:USERPROFILE\tmp\gsd-install"; if(Test-Path $d){Remove-Item -Recurse -Force $d}; git clone https://github.com/slainai/get-shit-done.git $d; Push-Location $d; node bin/install.js --claude --global; Pop-Location; Remove-Item -Recurse -Force $d
+  $d="$env:USERPROFILE\tmp\gsd-install"; if(Test-Path $d){Remove-Item -Recurse -Force $d}; git clone https://github.com/slainai/get-shit-done.git $d; Push-Location $d; npm install; npm run build:hooks; node bin/install.js --claude --global; Pop-Location; Remove-Item -Recurse -Force $d
 
 What's new:
 - [bullet points]
